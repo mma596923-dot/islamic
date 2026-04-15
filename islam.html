@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Islamic Quiz - Full Randomized Edition</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --gold: #ffd700;
+            --deep-gold: #ffaa00;
+            --soft-gold: #fffde7;
+            --bg-dark: #05080a;
+            --correct: #22c55e;
+            --wrong: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-dark);
+            color: white;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 100%, #0d1a2a 0%, #05080a 100%);
+            z-index: -1;
+        }
+
+        .particle-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        /* Төменнен жоғарыға біркелкі анимация */
+        @keyframes floatUpward {
+            0% { 
+                transform: translateY(110vh) scale(0.5); 
+                opacity: 0; 
+            }
+            15% { opacity: 1; }
+            85% { opacity: 1; }
+            100% { 
+                transform: translateY(-20vh) scale(1.2); 
+                opacity: 0; 
+            }
+        }
+
+        .moon {
+            position: absolute;
+            z-index: 1;
+            filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.6));
+            animation: floatUpward 25s linear infinite;
+        }
+
+        .star-group {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: floatUpward var(--float-duration) linear infinite;
+        }
+
+        .sparkle {
+            position: absolute;
+            background: radial-gradient(circle, #ffffff 0%, var(--gold) 40%, var(--deep-gold) 75%, transparent 100%);
+            clip-path: polygon(50% 0%, 55% 45%, 100% 50%, 55% 55%, 50% 100%, 45% 55%, 0% 50%, 45% 45%);
+            animation: starPulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes starPulse {
+            from { transform: scale(0.8); opacity: 0.7; }
+            to { transform: scale(1.1); opacity: 1; }
+        }
+
+        .phone-container {
+            width: 100%;
+            height: 100%;
+            max-width: 450px;
+            max-height: 850px;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .card {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: rgba(5, 10, 20, 0.85);
+            border: 2px solid rgba(255, 215, 0, 0.2);
+            backdrop-filter: blur(15px);
+            border-radius: 40px;
+            padding: 35px 25px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.7);
+            animation: cardSlideUp 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes cardSlideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            font-family: 'Amiri', serif;
+            color: var(--gold);
+            font-size: 2.6rem;
+            margin-bottom: 5px;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+        }
+
+        .subtitle {
+            color: #cbd5e1;
+            font-size: 1rem;
+            margin-bottom: 35px;
+        }
+
+        .timer-circle {
+            width: 75px;
+            height: 75px;
+            border: 4px solid var(--gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 25px;
+            background: rgba(0,0,0,0.4);
+        }
+
+        .question-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            line-height: 1.4;
+            min-height: 90px;
+        }
+
+        .options-grid {
+            width: 100%;
+            display: grid;
+            gap: 15px;
+        }
+
+        .option-btn {
+            width: 100%;
+            padding: 18px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.05);
+            color: white;
+            font-size: 1.15rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .option-btn:active { transform: scale(0.96); }
+
+        .start-btn {
+            background: linear-gradient(135deg, var(--gold), var(--deep-gold));
+            color: black;
+            font-weight: 800;
+            border: none;
+            padding: 22px 55px;
+            border-radius: 35px;
+            font-size: 1.3rem;
+            text-transform: uppercase;
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .is-correct { background: var(--correct) !important; border-color: var(--correct) !important; box-shadow: 0 0 20px var(--correct); }
+        .is-wrong { background: var(--wrong) !important; border-color: var(--wrong) !important; }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        #progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold), #fff);
+            width: 0%;
+            transition: width 0.4s;
+        }
+
+        .footer-stats {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-gradient"></div>
+<div class="particle-container" id="visuals"></div>
+
+<div class="phone-container">
+    <!-- Бастапқы бет (Start Screen) -->
+    <div id="startScreen" class="card">
+        <h1>🕌 Islamic Quiz</h1>
+        <p class="subtitle">Ислам діні бойынша біліміңізді тексеріңіз</p>
+        <button class="start-btn" onclick="startGame()">▶ БАСТАУ</button>
+    </div>
+
+    <!-- Викторина беті (Quiz Screen) -->
+    <div id="quizScreen" class="card" style="display:none;">
+        <div class="progress-bar"><div id="progress-fill"></div></div>
+        <div class="timer-circle" id="timer">30</div>
+        <div id="question" class="question-text"></div>
+        <div id="options" class="options-grid"></div>
+        <div class="footer-stats">
+            <span>Сұрақ: <span id="q-count">1/15</span></span>
+            <span>Ұпай: <span id="score-val" style="color:var(--gold)">0</span></span>
+        </div>
+    </div>
+
+    <!-- Нәтиже беті (Result Screen) -->
+    <div id="resultScreen" class="card" style="display:none;">
+        <h1>Нәтиже</h1>
+        <div id="final-score" style="font-size: 4.5rem; font-weight: 800; color: var(--gold); margin: 15px 0;">0</div>
+        <p id="result-msg" class="subtitle"></p>
+        <!-- Қайталау батырмасын басқанда басты бетке оралу үшін goHome() шақырылады -->
+        <button class="start-btn" onclick="goHome()">🔄 ҚАЙТАЛАУ</button>
+    </div>
+</div>
+
+<script>
+    const questionsDatabase = [
+        { q: "Исламның бес парызы қанша?", a: ["3", "5", "7", "6"], c: "5" },
+        { q: "Намаз күніне неше рет оқылады?", a: ["5", "3", "4", "6"], c: "5" },
+        { q: "Алғашқы уахи қайда түсті?", a: ["Хира үңгірі", "Мәдина", "Тайф", "Шам"], c: "Хира үңгірі" },
+        { q: "Қасиетті түн қалай аталады?", a: ["Қадір түні", "Жұма түні", "Айт түні", "Рамазан түні"], c: "Қадір түні" },
+        { q: "Мұсылмандардың қасиетті кітабы?", a: ["Інжіл", "Құран", "Таурат", "Зәбур"], c: "Құран" },
+        { q: "Иманның неше шарты бар?", a: ["5", "6", "7", "4"], c: "6" },
+        { q: "Ең алғашқы азаншы кім?", a: ["Әбу Бәкір", "Біләл Хабаши", "Омар", "Әли"], c: "Біләл Хабаши" },
+        { q: "Пайғамбарымыз (с.ғ.с.) қай қалада дүниеге келді?", a: ["Мәдина", "Мекке", "Иерусалим", "Жидда"], c: "Мекке" },
+        { q: "Рамазан айындағы ораза қай жылы парыз болды?", a: ["Хижраның 1-жылы", "Хижраның 2-жылы", "Хижраның 5-жылы", "Хижраның 10-жылы"], c: "Хижраның 2-жылы" },
+        { q: "Құранда неше сүре бар?", a: ["100", "114", "120", "150"], c: "114" },
+        { q: "Зекет беру кімдерге парыз?", a: ["Барлық адамға", "Бай мұсылмандарға", "Балаларға", "Тек қарттарға"], c: "Бай мұсылмандарға" },
+        { q: "Жұма намазы қай күні оқылады?", a: ["Дүйсенбі", "Жұма", "Сәрсенбі", "Жексенбі"], c: "Жұма" },
+        { q: "Ең ұзақ сүре қалай аталады?", a: ["Ихлас", "Бақара", "Ясин", "Фәтиха"], c: "Бақара" },
+        { q: "Пайғамбарымыздың (с.ғ.с.) әкесінің есімі кім?", a: ["Әбу Тәліп", "Абдуллаһ", "Әбділмүтәліп", "Хамза"], c: "Абдуллаһ" },
+        { q: "Ислам күнтізбесі қалай аталады?", a: ["Григориан", "Хижра", "Қытай", "Шығыс"], c: "Хижра" }
+    ];
+
+    let currentQuestions = [];
+    let currentIdx = 0, score = 0, timeLeft = 30, timerInterval, canAnswer = true;
+    let audioCtx;
+
+    function shuffle(array) {
+        const newArr = [...array];
+        for (let i = newArr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+        }
+        return newArr;
+    }
+
+    function playSound(type) {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'correct') {
+            osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); 
+            osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1); 
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.3);
+        } else if (type === 'wrong') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(220, audioCtx.currentTime); 
+            osc.frequency.linearRampToValueAtTime(110, audioCtx.currentTime + 0.2); 
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.4);
+        }
+    }
+
+    function initVisuals() {
+        const container = document.getElementById('visuals');
+        container.innerHTML = ''; 
+
+        for (let i = 0; i < 10; i++) {
+            const moon = document.createElement('div');
+            moon.className = 'moon';
+            moon.style.left = Math.random() * 90 + '%';
+            moon.style.animationDelay = (Math.random() * -30) + 's'; 
+            const size = 30 + Math.random() * 40;
+            moon.innerHTML = `<svg width="${size}" height="${size}" viewBox="0 0 100 100"><path d="M50 10 A40 40 0 1 0 90 50 A32 32 0 1 1 50 10" fill="var(--gold)"/></svg>`;
+            container.appendChild(moon);
+        }
+
+        for (let i = 0; i < 60; i++) {
+            const group = document.createElement('div');
+            group.className = 'star-group';
+            group.style.left = Math.random() * 100 + '%';
+            group.style.setProperty('--float-duration', (15 + Math.random() * 15) + 's');
+            group.style.animationDelay = (Math.random() * -20) + 's';
+
+            const s = document.createElement('div');
+            s.className = 'sparkle';
+            const size = 4 + Math.random() * 10;
+            s.style.width = size + 'px'; s.style.height = size + 'px';
+            group.appendChild(s);
+            container.appendChild(group);
+        }
+    }
+
+    // Басты бетке қайту функциясы
+    function goHome() {
+        document.getElementById('resultScreen').style.display = 'none';
+        document.getElementById('quizScreen').style.display = 'none';
+        document.getElementById('startScreen').style.display = 'flex';
+    }
+
+    function startGame() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        currentQuestions = shuffle(questionsDatabase);
+        currentIdx = 0; score = 0;
+        
+        document.getElementById('startScreen').style.display = 'none';
+        document.getElementById('resultScreen').style.display = 'none';
+        document.getElementById('quizScreen').style.display = 'flex';
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        canAnswer = true; timeLeft = 30;
+        document.getElementById('timer').innerText = timeLeft;
+        document.getElementById('score-val').innerText = score;
+        document.getElementById('q-count').innerText = `${currentIdx + 1}/${currentQuestions.length}`;
+        document.getElementById('progress-fill').style.width = `${((currentIdx) / currentQuestions.length) * 100}%`;
+        
+        const qData = currentQuestions[currentIdx];
+        document.getElementById('question').innerText = qData.q;
+
+        const optionsDiv = document.getElementById('options');
+        optionsDiv.innerHTML = '';
+        
+        const shuffledOptions = shuffle(qData.a);
+        
+        shuffledOptions.forEach(text => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = text;
+            btn.onclick = () => checkAnswer(text, btn, qData.c);
+            optionsDiv.appendChild(btn);
+        });
+        
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            document.getElementById('timer').innerText = timeLeft;
+            if (timeLeft <= 0) {
+                playSound('wrong');
+                nextQuestion();
+            }
+        }, 1000);
+    }
+
+    function checkAnswer(selected, btn, correct) {
+        if (!canAnswer) return;
+        canAnswer = false; 
+        clearInterval(timerInterval);
+
+        if (selected === correct) {
+            playSound('correct');
+            btn.classList.add('is-correct'); 
+            score += 10;
+        } else {
+            playSound('wrong');
+            btn.classList.add('is-wrong');
+            Array.from(document.querySelectorAll('.option-btn')).forEach(b => {
+                if (b.innerText === correct) b.classList.add('is-correct');
+            });
+        }
+        setTimeout(nextQuestion, 1200);
+    }
+
+    function nextQuestion() {
+        currentIdx++;
+        if (currentIdx < currentQuestions.length) loadQuestion();
+        else showResult();
+    }
+
+    function showResult() {
+        document.getElementById('quizScreen').style.display = 'none';
+        document.getElementById('resultScreen').style.display = 'flex';
+        document.getElementById('final-score').innerText = score;
+        const max = currentQuestions.length * 10;
+        document.getElementById('result-msg').innerText = score >= max * 0.7 ? "Өте жақсы! Біліміңіз жоғары. ✨" : "Жақсы, тағы да көріңіз! 📖";
+    }
+
+    window.onload = initVisuals;
+</script>
+</body>
+</html>
